@@ -4,6 +4,7 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const mongoose = require("mongoose");
+require("dotenv").config();
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
@@ -12,7 +13,7 @@ const tasksRouter = require("./routes/tasks");
 const app = express();
 
 mongoose
-  .connect("mongodb://localhost/todolist", {
+  .connect(process.env.mongoDBServer, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
