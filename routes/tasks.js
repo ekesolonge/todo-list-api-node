@@ -4,8 +4,12 @@ const Task = require("../models/tasks");
 const validateObjectId = require("../middleware/validateObjectId");
 
 router.get("/", async (req, res) => {
-  const tasks = await Task.find().select("-__v");
-  res.send(tasks);
+  try {
+    const tasks = await Task.find().select("-__v");
+    res.send(tasks);
+  } catch (error) {
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 router.get("/:id", validateObjectId, async (req, res) => {
