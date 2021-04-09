@@ -24,8 +24,8 @@ router.get("/:id", validateObjectId, async (req, res) => {
 router.post("/", async (req, res) => {
   const { name } = req.body;
   if (!req.body) return res.status(400).send("Fill required inputs");
-  if (name.length < 2)
-    return res.status(400).send("Input must be more than 2 characters");
+  if (name.length < 2 || name.length > 255)
+    return res.status(400).send("Input must be between 2 to 255 characters");
   const task = new Task({ name });
 
   try {
