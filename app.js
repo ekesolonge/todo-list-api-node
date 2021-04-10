@@ -13,6 +13,8 @@ const tasksRouter = require("./routes/tasks");
 
 const app = express();
 
+const port = 3000;
+
 mongoose
   .connect(process.env.mongoDBServer, {
     useNewUrlParser: true,
@@ -62,4 +64,4 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-module.exports = app;
+app.listen(port, () => console.log("listening on " + port + "..."));

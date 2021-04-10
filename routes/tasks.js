@@ -1,18 +1,20 @@
 const express = require("express");
 const router = express.Router();
-const Task = require("../models/tasks");
+const { Task, validate } = require("../models/tasks");
+const { User } = require("../models/user");
 const validateObjectId = require("../middleware/validateObjectId");
+const auth = require("../middleware/auth");
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
-    const tasks = await Task.find().select("-__v");
+    const tasks = await Task.find({ userId: req.user._id }).select("-__v");
     res.send(tasks);
   } catch (error) {
     res.status(500).send("Internal Server Error");
   }
 });
 
-router.get("/:id", validateObjectId, async (req, res) => {
+router.get("/:id", auth, validateObjectId, async (req, res) => {
   const task = await Task.findById(req.params.id).select("-__v");
 
   if (!task)
@@ -21,26 +23,34 @@ router.get("/:id", validateObjectId, async (req, res) => {
   res.send(task);
 });
 
-router.post("/", async (req, res) => {
-  const { name } = req.body;
-  if (!req.body) return res.status(400).send("Fill required inputs");
-  if (name.length < 2 || name.length > 255)
-    return res.status(400).send("Input must be between 2 to 255 characters");
-  const task = new Task({ name });
+router.post("/", auth, async (req, res) => {
+  const { error } = validate(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
+  const task = new Task({
+    name: req.body.name,
+    userId: req.user._id,
+  });
 
   try {
     const result = await task.save();
     res.send(result);
   } catch (ex) {
-    res.status(400).send("Fill required inputs");
+    res.status(400).send(ex.message);
     console.log(ex);
   }
 });
 
-router.put("/:id", validateObjectId, async (req, res) => {
-  const { name } = req.body;
+router.put("/:id", auth, validateObjectId, async (req, res) => {
+  const { error } = validate(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
   const { id } = req.params;
-  const task = await Task.findByIdAndUpdate(id, { name }, { new: true });
+  const task = await Task.findByIdAndUpdate(
+    id,
+    { name: req.body.name },
+    { new: true }
+  );
 
   if (!task)
     return res.status(404).send("The task with the given ID was not found.");
@@ -48,7 +58,7 @@ router.put("/:id", validateObjectId, async (req, res) => {
   res.send(task);
 });
 
-router.delete("/:id", validateObjectId, async (req, res) => {
+router.delete("/:id", auth, validateObjectId, async (req, res) => {
   const task = await Task.findByIdAndRemove(req.params.id);
 
   if (!task)
