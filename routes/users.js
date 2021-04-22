@@ -4,12 +4,19 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const { User, validate } = require("../models/user");
 const auth = require("../middleware/auth");
+const {
+  resetPassword,
+  handleResetPassword,
+  setPassword,
+} = require("../controllers/passwordReset");
 
+// Get User
 router.get("/me", auth, async (req, res) => {
   const user = await User.findById(req.user._id).select(["-password", "-__v"]);
   res.send(user);
 });
 
+// Register User
 router.post("/", async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
@@ -17,7 +24,7 @@ router.post("/", async (req, res) => {
   let user = await User.findOne({ username: req.body.username });
   if (user) return res.status(400).send("User already registered.");
 
-  user = new User(_.pick(req.body, ["username", "password"]));
+  user = new User(_.pick(req.body, ["username", "email", "password"]));
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(user.password, salt);
   await user.save();
@@ -26,14 +33,15 @@ router.post("/", async (req, res) => {
   res
     .header("x-auth-token", token)
     .header("access-control-expose-headers", "x-auth-token")
-    .send(_.pick(user, ["_id", "username"]));
+    .send(_.pick(user, ["_id", "email", "username"]));
 });
 
+// Login
 router.post("/login", async (req, res) => {
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
   let user = await User.findOne({ username: req.body.username });
+
+  if (!user) user = await User.findOne({ email: req.body.username });
+
   if (!user) return res.status(400).send("Invalid username or password.");
 
   const validPassword = await bcrypt.compare(req.body.password, user.password);
@@ -43,5 +51,14 @@ router.post("/login", async (req, res) => {
   const token = user.generateAuthToken();
   res.send(token);
 });
+
+// Reset Password
+router.post("/resetPassword", resetPassword);
+
+// Handle Password Reset
+router.get("/auth/reset/:userId/:otpCode", handleResetPassword);
+
+// Set New Password
+router.post("/setNewPassword", setPassword);
 
 module.exports = router;
