@@ -20,7 +20,13 @@ const oauth2Client = new OAuth2(
 
 oauth2Client.setCredentials({ refresh_token: MAILING_SERVICE_REFRESH_TOKEN });
 
-const accessToken = oauth2Client.getAccessToken();
+const getAccessToken = async () => {
+  try {
+    await oauth2Client.getAccessToken();
+  } catch (error) {
+    console.log("GoogleAuthError");
+  }
+};
 
 const smtpTransport = nodemailer.createTransport({
   service: "gmail",
@@ -30,7 +36,7 @@ const smtpTransport = nodemailer.createTransport({
     clientId: MAILING_SERVICE_CLIENT_ID,
     clientSecret: MAILING_SERVICE_CLIENT_SECRET,
     refreshToken: MAILING_SERVICE_REFRESH_TOKEN,
-    accessToken,
+    accessToken: getAccessToken(),
   },
 });
 
