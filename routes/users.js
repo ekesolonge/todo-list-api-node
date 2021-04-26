@@ -4,11 +4,7 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const { User, validate } = require("../models/user");
 const auth = require("../middleware/auth");
-const {
-  resetPassword,
-  handleResetPassword,
-  setPassword,
-} = require("../controllers/passwordReset");
+const { resetPassword, setPassword } = require("../controllers/passwordReset");
 
 // Get User
 router.get("/me", auth, async (req, res) => {
@@ -42,6 +38,10 @@ router.post("/", async (req, res) => {
 
 // Login
 router.post("/login", async (req, res) => {
+  if (!req.body.username)
+    return res.status(400).send("username or email is required");
+  if (!req.body.password) return res.status(400).send("password is required");
+
   let user = await User.findOne({ username: req.body.username });
 
   if (!user) user = await User.findOne({ email: req.body.username });
@@ -58,9 +58,6 @@ router.post("/login", async (req, res) => {
 
 // Reset Password
 router.post("/resetPassword", resetPassword);
-
-// Handle Password Reset
-router.get("/auth/reset/:userId/:otpCode", handleResetPassword);
 
 // Set New Password
 router.post("/setNewPassword", setPassword);

@@ -1,9 +1,4 @@
-module.exports.emailTemplate = (
-  username,
-  baseUrl,
-  userId,
-  otp
-) => `<!DOCTYPE HTML
+module.exports.emailTemplate = (username, baseUrl, token) => `<!DOCTYPE HTML
     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
     xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -374,7 +369,7 @@ module.exports.emailTemplate = (
                                                             align="left">
                                                             <div class="v-text-align" align="center">
                                                                 <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-spacing: 0; border-collapse: collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;font-family:'Cabin',sans-serif;"><tr><td class="v-text-align" style="font-family:'Cabin',sans-serif;" align="center"><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="baseurl" style="height:46px; v-text-anchor:middle; width:234px;" arcsize="8.5%" stroke="f" fillcolor="#8c30f5"><w:anchorlock/><center style="color:#ffffff;font-family:'Cabin',sans-serif;"><![endif]-->
-                                                                <a href="${baseUrl}/api/users/auth/reset/${userId}/${otp}"
+                                                                <a href="${baseUrl}/resetPassword/${token}"
                                                                     target="_blank" class="v-size-width" style="box-sizing:
                                                                     border-box;display:
                                                                     inline-block;font-family:'Cabin',sans-serif;text-decoration:
