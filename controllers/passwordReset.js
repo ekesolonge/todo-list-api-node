@@ -32,7 +32,7 @@ const resetPassword = async (req, res, next) => {
     "TODOLIST <todolist@noreply.com>",
     "Request to reset password",
     `${user.email}`,
-    emailTemplate(user.username, process.env.CLIENT_URL, token),
+    emailTemplate(user.username, req.body.clientUrl, token),
     err => {
       if (err) {
         console.log(err);
@@ -74,6 +74,7 @@ const setPassword = async (req, res) => {
 function validate(email) {
   const schema = Joi.object({
     email: Joi.string().min(5).max(255).required().email(),
+    clientUrl: Joi.string().uri(),
   });
 
   return schema.validate(email);
